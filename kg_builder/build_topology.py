@@ -13,21 +13,26 @@ Output:
     basin_topology.ttl
 """
 
+from pathlib import Path
+
 import geopandas as gpd
 import pandas as pd
 
 from rdflib import Graph, Namespace
+from rdflib.namespace import RDF
 
 
 # ----------------------------------------------------------
 # CONFIGURATION
 # ----------------------------------------------------------
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
 HYDRO = Namespace("http://example.org/hydro/ontology#")
 
-INPUT_REACH_FILE = "../data/NHDPlus_flowlines.shp"
+INPUT_REACH_FILE = PROJECT_ROOT / "data" / "NHDPlus_flowlines.shp"
 
-OUTPUT_TTL = "../rdf/basin_topology.ttl"
+OUTPUT_TTL = PROJECT_ROOT / "rdf" / "basin_topology.ttl"
 
 
 # ----------------------------------------------------------
@@ -36,11 +41,16 @@ OUTPUT_TTL = "../rdf/basin_topology.ttl"
 
 def load_reach_dataset(file_path):
 
-    if file_path.endswith(".shp"):
+    file_path = Path(file_path)
+
+    if not file_path.exists():
+        raise FileNotFoundError(f"Reach dataset not found: {file_path}")
+
+    if file_path.suffix == ".shp":
         gdf = gpd.read_file(file_path)
         df = pd.DataFrame(gdf.drop(columns="geometry"))
 
-    elif file_path.endswith(".csv"):
+    elif file_path.suffix == ".csv":
         df = pd.read_csv(file_path)
 
     else:
@@ -62,11 +72,9 @@ def detect_topology_columns(df):
 
         cl = c.lower()
 
-        # Reach identifier
         if cl in ["comid", "reach_id", "reachid", "id", "nhdplusid"]:
             reach_col = c
 
-        # Downstream reach
         if cl in ["tocomid", "downstream", "toid", "nextdownid", "tonode"]:
             downstream_col = c
 
@@ -86,6 +94,7 @@ def detect_topology_columns(df):
 def build_topology(df):
 
     g = Graph()
+
     g.bind("hydro", HYDRO)
 
     reach_col, downstream_col = detect_topology_columns(df)
@@ -136,7 +145,8 @@ def main():
 
     print("Writing TTL file...")
 
-    g.serialize(destination=OUTPUT_TTL, format="turtle")
+    OUTPUT_TTL.parent.mkdir(parents=True, exist_ok=True)
+    g.serialize(destination=str(OUTPUT_TTL), format="turtle")
 
     print(f"Topology saved to {OUTPUT_TTL}")
 
@@ -146,4 +156,5 @@ def main():
 # ----------------------------------------------------------
 
 if __name__ == "__main__":
+
     main()

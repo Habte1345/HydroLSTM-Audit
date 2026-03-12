@@ -1,94 +1,150 @@
 """
-Build HydroKG Ontology Schema (T-Box)
+build_hydro_schema.py
+
+Step 1 of Hydrologic Knowledge Graph construction.
+
+Builds the ontology schema (T-Box) from glossaries.json
+and writes hydro_schema.ttl.
+
+This version preserves the original schema logic:
+- metadata description
+- multiple domains
+- object/data property distinction
+- proper range handling
+- custom annotations: auditRole, hasUnit
 """
 
 from pathlib import Path
 import json
-from rdflib import Graph, Namespace, RDF, RDFS, OWL, Literal
+from rdflib import Graph, Namespace, Literal, RDF, RDFS, OWL, URIRef
 from rdflib.namespace import XSD
 
 
-def build_schema():
+# ----------------------------------------------------------
+# CONFIGURATION
+# ----------------------------------------------------------
 
-    PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-    ontology_file = PROJECT_ROOT / "ontology" / "glossaries.json"
-    output_file = PROJECT_ROOT / "ontology" / "hydro_schema.ttl"
+INPUT_JSON = PROJECT_ROOT / "ontology" / "glossaries.json"
+OUTPUT_TTL = PROJECT_ROOT / "ontology" / "hydro_schema.ttl"
 
-    HYDRO = Namespace("https://alabama-hydro.org/ontology/")
+HYDRO = Namespace("http://example.org/hydro/ontology#")
+ONTOLOGY_URI = URIRef("http://example.org/hydro/ontology")
 
-    print("Loading glossary file:", ontology_file)
 
-    with open(ontology_file, "r") as f:
-        data = json.load(f)
+# ----------------------------------------------------------
+# BUILD ONTOLOGY
+# ----------------------------------------------------------
 
+def build_ontology(json_filepath=INPUT_JSON, output_filepath=OUTPUT_TTL):
+    # 1. Load the JSON glossary data
+    with open(json_filepath, "r", encoding="utf-8") as file:
+        data = json.load(file)
+
+    # 2. Initialize the Graph and define Namespaces
     g = Graph()
 
+    # Bind prefixes for cleaner output in the .ttl file
     g.bind("hydro", HYDRO)
     g.bind("owl", OWL)
     g.bind("rdfs", RDFS)
     g.bind("xsd", XSD)
 
-    ontology_uri = HYDRO["HydroOntology"]
+    # Add general metadata about the ontology
+    g.add((ONTOLOGY_URI, RDF.type, OWL.Ontology))
 
-    g.add((ontology_uri, RDF.type, OWL.Ontology))
+    if "metadata" in data and "description" in data["metadata"]:
+        g.add((ONTOLOGY_URI, RDFS.comment, Literal(data["metadata"]["description"])))
 
-    # --------------------------------------------------
-    # Classes
-    # --------------------------------------------------
+    # Explicitly declare custom annotation properties used in the ontology
+    g.add((HYDRO.auditRole, RDF.type, OWL.AnnotationProperty))
+    g.add((HYDRO.hasUnit, RDF.type, OWL.AnnotationProperty))
 
-    classes = data.get("classes", {})
-
-    for class_name, details in classes.items():
-
+    # 3. Process and Add Classes
+    for class_name, details in data.get("classes", {}).items():
         class_uri = HYDRO[class_name]
-
         g.add((class_uri, RDF.type, OWL.Class))
 
-        description = details.get("description", "")
+        if "description" in details:
+            g.add((class_uri, RDFS.comment, Literal(details["description"])))
 
-        if description:
-            g.add((class_uri, RDFS.comment, Literal(description)))
-
-    # --------------------------------------------------
-    # Properties
-    # --------------------------------------------------
-
-    properties = data.get("properties", {})
-
-    for prop_name, details in properties.items():
-
+    # 4. Process and Add Properties
+    for prop_name, details in data.get("properties", {}).items():
         prop_uri = HYDRO[prop_name]
 
-        ptype = details.get("type", "data_property")
+        prop_type = details.get("type", None)
 
-        if ptype == "object_property":
+        # Determine if it is an ObjectProperty or DatatypeProperty
+        if prop_type == "object_property":
             g.add((prop_uri, RDF.type, OWL.ObjectProperty))
+        elif prop_type == "data_property":
+            g.add((prop_uri, RDF.type, OWL.DatatypeProperty))
         else:
+            # safe fallback
             g.add((prop_uri, RDF.type, OWL.DatatypeProperty))
 
-        domain = details.get("domain")
+        # Assign Domain
+        domains = details.get("domain", None)
+        if isinstance(domains, list):
+            for d in domains:
+                g.add((prop_uri, RDFS.domain, HYDRO[d]))
+        elif isinstance(domains, str):
+            g.add((prop_uri, RDFS.domain, HYDRO[domains]))
 
-        if domain:
-            g.add((prop_uri, RDFS.domain, HYDRO[domain]))
+        # Assign Range
+        prop_range = details.get("range", None)
 
-        prange = details.get("range")
+        if prop_type == "object_property":
+            if isinstance(prop_range, str):
+                g.add((prop_uri, RDFS.range, HYDRO[prop_range]))
+        else:
+            if prop_range == "float":
+                g.add((prop_uri, RDFS.range, XSD.float))
+            elif prop_range == "integer":
+                g.add((prop_uri, RDFS.range, XSD.integer))
+            elif prop_range == "string":
+                g.add((prop_uri, RDFS.range, XSD.string))
+            elif prop_range == "dateTime":
+                g.add((prop_uri, RDFS.range, XSD.dateTime))
+            elif prop_range == "date":
+                g.add((prop_uri, RDFS.range, XSD.date))
+            elif prop_range == "boolean":
+                g.add((prop_uri, RDFS.range, XSD.boolean))
 
-        if prange == "float":
-            g.add((prop_uri, RDFS.range, XSD.float))
+        # Add definitions and custom audit annotations
+        if "definition" in details:
+            g.add((prop_uri, RDFS.comment, Literal(details["definition"])))
 
-        elif prange == "integer":
-            g.add((prop_uri, RDFS.range, XSD.integer))
+        if "audit_role" in details:
+            g.add((prop_uri, HYDRO.auditRole, Literal(details["audit_role"])))
 
-        elif prange == "string":
-            g.add((prop_uri, RDFS.range, XSD.string))
+        if "unit" in details:
+            g.add((prop_uri, HYDRO.hasUnit, Literal(details["unit"])))
 
-        definition = details.get("definition")
+    # 5. Serialize the graph to a Turtle (.ttl) file
+    output_filepath = Path(output_filepath)
+    output_filepath.parent.mkdir(parents=True, exist_ok=True)
 
-        if definition:
-            g.add((prop_uri, RDFS.comment, Literal(definition)))
+    g.serialize(destination=str(output_filepath), format="turtle")
 
-    g.serialize(destination=output_file, format="turtle")
+    print(f"Ontology successfully saved to {output_filepath}")
+    print(f"Total triples: {len(g)}")
 
-    print("Schema written to:", output_file)
-    print("Total triples:", len(g))
+    return g
+
+
+# ----------------------------------------------------------
+# WRAPPER FOR PIPELINE
+# ----------------------------------------------------------
+
+def build_schema():
+    return build_ontology(INPUT_JSON, OUTPUT_TTL)
+
+
+# ----------------------------------------------------------
+# RUN
+# ----------------------------------------------------------
+
+if __name__ == "__main__":
+    build_schema()
