@@ -1,0 +1,118 @@
+@prefix hydro: <https://alabama-hydro.org/ontology/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+hydro:Forcing a owl:Class ;
+    rdfs:comment "Externally imposed drivers such as precipitation or temperature." .
+
+hydro:HydroOntology a owl:Ontology .
+
+hydro:Prediction a owl:Class ;
+    rdfs:comment "Model-generated outputs (e.g., LSTM streamflow predictions)." .
+
+hydro:StaticAttribute a owl:Class ;
+    rdfs:comment "Time-invariant physical characteristics of reaches or catchments." .
+
+hydro:TimeStep a owl:Class ;
+    rdfs:comment "A discrete temporal index used to relate dynamic observations and predictions." .
+
+hydro:flowsTo a owl:ObjectProperty ;
+    rdfs:comment "Defines downstream topological connectivity between river reaches." ;
+    rdfs:domain hydro:Reach .
+
+hydro:hasAirTemperature a owl:DatatypeProperty ;
+    rdfs:comment "Mean 2-meter air temperature over a timestep." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasDischarge a owl:DatatypeProperty ;
+    rdfs:comment "Volumetric streamflow rate at a reach." ;
+    rdfs:domain hydro: ;
+    rdfs:range xsd:float .
+
+hydro:hasFlowType a owl:DatatypeProperty ;
+    rdfs:comment "Categorical description of flow regime or channel type." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:string .
+
+hydro:hasGeometry a owl:ObjectProperty ;
+    rdfs:comment "Spatial geometry of the river reach." ;
+    rdfs:domain hydro:Reach .
+
+hydro:hasMaxCapacity a owl:DatatypeProperty ;
+    rdfs:comment "Estimated maximum conveyance capacity of the reach." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:float .
+
+hydro:hasMeanCatchmentSlope a owl:DatatypeProperty ;
+    rdfs:comment "Mean slope of the catchment." ;
+    rdfs:domain hydro:Catchment ;
+    rdfs:range xsd:float .
+
+hydro:hasMeanElevation a owl:DatatypeProperty ;
+    rdfs:comment "Mean elevation of the catchment." ;
+    rdfs:domain hydro:Catchment ;
+    rdfs:range xsd:float .
+
+hydro:hasPotentialEvaporation a owl:DatatypeProperty ;
+    rdfs:comment "Potential evaporation summed over a timestep." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasPrecipitation a owl:DatatypeProperty ;
+    rdfs:comment "Total precipitation over a timestep." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasReachLength a owl:DatatypeProperty ;
+    rdfs:comment "Total length of the river reach." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:float .
+
+hydro:hasSlope a owl:DatatypeProperty ;
+    rdfs:comment "Average bed slope of the reach." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:float .
+
+hydro:hasSnowWaterEquivalent a owl:DatatypeProperty ;
+    rdfs:comment "Mean snow water equivalent." ;
+    rdfs:domain hydro:State ;
+    rdfs:range xsd:float .
+
+hydro:hasSoilMoistureL1 a owl:DatatypeProperty ;
+    rdfs:comment "Mean volumetric soil water content, layer 1." ;
+    rdfs:domain hydro:State ;
+    rdfs:range xsd:float .
+
+hydro:hasSoilMoistureL2 a owl:DatatypeProperty ;
+    rdfs:comment "Mean volumetric soil water content, layer 2." ;
+    rdfs:domain hydro:State ;
+    rdfs:range xsd:float .
+
+hydro:hasSoilMoistureL3 a owl:DatatypeProperty ;
+    rdfs:comment "Mean volumetric soil water content, layer 3." ;
+    rdfs:domain hydro:State ;
+    rdfs:range xsd:float .
+
+hydro:hasStreamOrder a owl:DatatypeProperty ;
+    rdfs:comment "Strahler stream order classification." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:integer .
+
+hydro:hasTimeStep a owl:ObjectProperty ;
+    rdfs:comment "Associates a value with a specific timestep." ;
+    rdfs:domain hydro: .
+
+hydro:Catchment a owl:Class ;
+    rdfs:comment "A hydrologic drainage basin used as a spatial aggregation unit." .
+
+hydro:Observation a owl:Class ;
+    rdfs:comment "Measured hydrologic, meteorologic, or land-surface variables." .
+
+hydro:State a owl:Class ;
+    rdfs:comment "Internal system states such as soil moisture or snow water equivalent." .
+
+hydro:Reach a owl:Class ;
+    rdfs:comment "A river network segment with static physical attributes and topology." .
+
