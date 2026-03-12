@@ -4,7 +4,8 @@ from pathlib import Path
 # ------------------------------------------------
 # Add project root to Python path
 # ------------------------------------------------
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path("C:\\Users\\wooda\\Downloads\\nrt_project").resolve().parents[1]
+
 
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -15,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from kg_builder.build_hydro_schema import build_schema
 from kg_builder.build_static_basin_backbone import build_static_backbone
 from kg_builder.build_topology import main as build_topology
-
+from kg_builder.build_hydro_schema import build_schema
 
 def run():
 
