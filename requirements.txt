@@ -1,0 +1,15 @@
+pandas
+numpy
+rdflib
+geopandas
+pyproj
+networkx
+plotly
+streamlit
+folium
+streamlit-folium
+shapely
+fiona
+pyvis
+
+# pip install -r requirements.txt

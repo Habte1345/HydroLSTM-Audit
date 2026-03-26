@@ -1,0 +1,212 @@
+{
+  "metadata": {
+    "basin_id": "02371500",
+    "purpose": "Hydrologic Semantic Validation Framework",
+    "description": "Glossary and standardized vocabulary for KG-based auditing of LSTM streamflow predictions",
+    "units_convention": "SI",
+    "notes": "This glossary defines entities, attributes, and predicates prior to RDF instantiation."
+  },
+
+  "classes": {
+    "Catchment": {
+      "description": "A hydrologic drainage basin used as a spatial aggregation unit."
+    },
+    "Reach": {
+      "description": "A river network segment with static physical attributes and topology."
+    },
+    "TimeStep": {
+      "description": "A discrete temporal index used to relate dynamic observations and predictions."
+    },
+    "Observation": {
+      "description": "Measured hydrologic, meteorologic, or land-surface variables."
+    },
+    "Prediction": {
+      "description": "Model-generated outputs (e.g., LSTM streamflow predictions)."
+    },
+    "Forcing": {
+      "description": "Externally imposed drivers such as precipitation or temperature."
+    },
+    "State": {
+      "description": "Internal system states such as soil moisture."
+    },
+    "StaticAttribute": {
+      "description": "Time-invariant physical characteristics of reaches or catchments."
+    }
+  },
+
+  "properties": {
+
+    "flowsTo": {
+      "domain": "Reach",
+      "range": "Reach",
+      "type": "object_property",
+      "definition": "Defines downstream topological connectivity between river reaches.",
+      "audit_role": "Mass conservation (routing of upstream flow)"
+    },
+
+    "containsReach": {
+      "domain": "Catchment",
+      "range": "Reach",
+      "type": "object_property",
+      "definition": "Associates a catchment with the river reaches physically located within it.",
+      "audit_role": "Spatial containment of river network elements"
+    },
+
+    "forCatchment": {
+      "domain": ["Observation", "Prediction"],
+      "range": "Catchment",
+      "type": "object_property",
+      "definition": "Associates an observation or prediction with a specific catchment.",
+      "audit_role": "Spatial alignment of dynamic hydrologic variables"
+    },
+
+    "hasGeometry": {
+      "domain": "Reach",
+      "range": "Geometry",
+      "type": "object_property",
+      "definition": "Spatial geometry of the river reach.",
+      "audit_role": "Topological consistency and spatial context"
+    },
+
+    "hasReachLength": {
+      "domain": "Reach",
+      "range": "float",
+      "unit": "m",
+      "type": "data_property",
+      "definition": "Total length of the river reach.",
+      "audit_role": "Capacity estimation and hydraulic scaling"
+    },
+
+    "hasSlope": {
+      "domain": "Reach",
+      "range": "float",
+      "unit": "m/m",
+      "type": "data_property",
+      "definition": "Average bed slope of the reach.",
+      "audit_role": "Capacity estimation and flow plausibility"
+    },
+
+    "hasStreamOrder": {
+      "domain": "Reach",
+      "range": "integer",
+      "type": "data_property",
+      "definition": "Strahler stream order classification.",
+      "audit_role": "Hydrologic hierarchy and scaling"
+    },
+
+    "hasFlowType": {
+      "domain": "Reach",
+      "range": "string",
+      "type": "data_property",
+      "definition": "Categorical description of flow regime or channel type.",
+      "audit_role": "Contextual filtering and diagnostics"
+    },
+
+    "hasMeanElevation": {
+      "domain": "Catchment",
+      "range": "float",
+      "unit": "m",
+      "type": "data_property",
+      "definition": "Mean elevation of the catchment.",
+      "audit_role": "Climatic and hydrologic context"
+    },
+
+    "hasMeanCatchmentSlope": {
+      "domain": "Catchment",
+      "range": "float",
+      "unit": "degrees",
+      "type": "data_property",
+      "definition": "Mean slope of the catchment.",
+      "audit_role": "Runoff response characterization"
+    },
+
+    "hasPrecipitation": {
+      "domain": "Observation",
+      "range": "float",
+      "unit": "mm",
+      "type": "data_property",
+      "definition": "Total precipitation over a timestep.",
+      "audit_role": "Mass conservation forcing term"
+    },
+
+    "hasAirTemperature": {
+      "domain": "Observation",
+      "range": "float",
+      "unit": "K",
+      "type": "data_property",
+      "definition": "Mean 2-meter air temperature over a timestep.",
+      "audit_role": "Hydrologic regime context"
+    },
+
+    "hasPotentialEvaporation": {
+      "domain": "Observation",
+      "range": "float",
+      "unit": "mm",
+      "type": "data_property",
+      "definition": "Potential evaporation summed over a timestep.",
+      "audit_role": "Upper bound on evaporative losses"
+    },
+
+  "hasSolarRadiation": {
+        "domain": "Observation",
+        "range": "float",
+        "unit": "W/m2",
+        "type": "data_property",
+        "definition": "Surface net solar radiation averaged over the timestep.",
+        "audit_role": "Energy balance context"
+      },
+
+    "hasSoilMoistureL1": {
+      "domain": "Observation",
+      "range": "float",
+      "unit": "m3/m3",
+      "type": "data_property",
+      "definition": "Mean volumetric soil water content, layer 1.",
+      "audit_role": "Storage continuity support"
+    },
+
+    "hasSoilMoistureL2": {
+      "domain": "Observation",
+      "range": "float",
+      "unit": "m3/m3",
+      "type": "data_property",
+      "definition": "Mean volumetric soil water content, layer 2.",
+      "audit_role": "Storage continuity support"
+    },
+
+    "hasSoilMoistureL3": {
+      "domain": "Observation",
+      "range": "float",
+      "unit": "m3/m3",
+      "type": "data_property",
+      "definition": "Mean volumetric soil water content, layer 3.",
+      "audit_role": "Storage continuity support"
+    },
+
+    "hasDischarge": {
+      "domain": ["Observation", "Prediction"],
+      "range": "float",
+      "unit": "m3/s",
+      "type": "data_property",
+      "definition": "Volumetric streamflow rate at a catchment outlet.",
+      "audit_role": "Primary variable audited for all hydrologic constraints"
+    },
+
+    "hasMaxCapacity": {
+      "domain": "Reach",
+      "range": "float",
+      "unit": "m3/s",
+      "type": "data_property",
+      "definition": "Estimated maximum conveyance capacity of the reach.",
+      "audit_role": "Physical overflow constraint"
+    },
+
+    "hasTimeStep": {
+      "domain": ["Observation", "Prediction"],
+      "range": "TimeStep",
+      "type": "object_property",
+      "definition": "Associates a value with a specific timestep.",
+      "audit_role": "Temporal continuity checks"
+    }
+  }
+}

@@ -1,0 +1,168 @@
+@prefix hydro: <http://example.org/hydro/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.org/hydro/ontology> a owl:Ontology ;
+    rdfs:comment "Glossary and standardized vocabulary for KG-based auditing of LSTM streamflow predictions" .
+
+hydro:Forcing a owl:Class ;
+    rdfs:comment "Externally imposed drivers such as precipitation or temperature." .
+
+hydro:State a owl:Class ;
+    rdfs:comment "Internal system states such as soil moisture." .
+
+hydro:StaticAttribute a owl:Class ;
+    rdfs:comment "Time-invariant physical characteristics of reaches or catchments." .
+
+hydro:containsReach a owl:ObjectProperty ;
+    hydro:auditRole "Spatial containment of river network elements" ;
+    rdfs:comment "Associates a catchment with the river reaches physically located within it." ;
+    rdfs:domain hydro:Catchment ;
+    rdfs:range hydro:Reach .
+
+hydro:flowsTo a owl:ObjectProperty ;
+    hydro:auditRole "Mass conservation (routing of upstream flow)" ;
+    rdfs:comment "Defines downstream topological connectivity between river reaches." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range hydro:Reach .
+
+hydro:forCatchment a owl:ObjectProperty ;
+    hydro:auditRole "Spatial alignment of dynamic hydrologic variables" ;
+    rdfs:comment "Associates an observation or prediction with a specific catchment." ;
+    rdfs:domain hydro:Observation,
+        hydro:Prediction ;
+    rdfs:range hydro:Catchment .
+
+hydro:hasAirTemperature a owl:DatatypeProperty ;
+    hydro:auditRole "Hydrologic regime context" ;
+    hydro:hasUnit "K" ;
+    rdfs:comment "Mean 2-meter air temperature over a timestep." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasDischarge a owl:DatatypeProperty ;
+    hydro:auditRole "Primary variable audited for all hydrologic constraints" ;
+    hydro:hasUnit "m3/s" ;
+    rdfs:comment "Volumetric streamflow rate at a catchment outlet." ;
+    rdfs:domain hydro:Observation,
+        hydro:Prediction ;
+    rdfs:range xsd:float .
+
+hydro:hasFlowType a owl:DatatypeProperty ;
+    hydro:auditRole "Contextual filtering and diagnostics" ;
+    rdfs:comment "Categorical description of flow regime or channel type." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:string .
+
+hydro:hasGeometry a owl:ObjectProperty ;
+    hydro:auditRole "Topological consistency and spatial context" ;
+    rdfs:comment "Spatial geometry of the river reach." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range hydro:Geometry .
+
+hydro:hasMaxCapacity a owl:DatatypeProperty ;
+    hydro:auditRole "Physical overflow constraint" ;
+    hydro:hasUnit "m3/s" ;
+    rdfs:comment "Estimated maximum conveyance capacity of the reach." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:float .
+
+hydro:hasMeanCatchmentSlope a owl:DatatypeProperty ;
+    hydro:auditRole "Runoff response characterization" ;
+    hydro:hasUnit "degrees" ;
+    rdfs:comment "Mean slope of the catchment." ;
+    rdfs:domain hydro:Catchment ;
+    rdfs:range xsd:float .
+
+hydro:hasMeanElevation a owl:DatatypeProperty ;
+    hydro:auditRole "Climatic and hydrologic context" ;
+    hydro:hasUnit "m" ;
+    rdfs:comment "Mean elevation of the catchment." ;
+    rdfs:domain hydro:Catchment ;
+    rdfs:range xsd:float .
+
+hydro:hasPotentialEvaporation a owl:DatatypeProperty ;
+    hydro:auditRole "Upper bound on evaporative losses" ;
+    hydro:hasUnit "mm" ;
+    rdfs:comment "Potential evaporation summed over a timestep." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasPrecipitation a owl:DatatypeProperty ;
+    hydro:auditRole "Mass conservation forcing term" ;
+    hydro:hasUnit "mm" ;
+    rdfs:comment "Total precipitation over a timestep." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasReachLength a owl:DatatypeProperty ;
+    hydro:auditRole "Capacity estimation and hydraulic scaling" ;
+    hydro:hasUnit "m" ;
+    rdfs:comment "Total length of the river reach." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:float .
+
+hydro:hasSlope a owl:DatatypeProperty ;
+    hydro:auditRole "Capacity estimation and flow plausibility" ;
+    hydro:hasUnit "m/m" ;
+    rdfs:comment "Average bed slope of the reach." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:float .
+
+hydro:hasSoilMoistureL1 a owl:DatatypeProperty ;
+    hydro:auditRole "Storage continuity support" ;
+    hydro:hasUnit "m3/m3" ;
+    rdfs:comment "Mean volumetric soil water content, layer 1." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasSoilMoistureL2 a owl:DatatypeProperty ;
+    hydro:auditRole "Storage continuity support" ;
+    hydro:hasUnit "m3/m3" ;
+    rdfs:comment "Mean volumetric soil water content, layer 2." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasSoilMoistureL3 a owl:DatatypeProperty ;
+    hydro:auditRole "Storage continuity support" ;
+    hydro:hasUnit "m3/m3" ;
+    rdfs:comment "Mean volumetric soil water content, layer 3." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasSolarRadiation a owl:DatatypeProperty ;
+    hydro:auditRole "Energy balance context" ;
+    hydro:hasUnit "W/m2" ;
+    rdfs:comment "Surface net solar radiation averaged over the timestep." ;
+    rdfs:domain hydro:Observation ;
+    rdfs:range xsd:float .
+
+hydro:hasStreamOrder a owl:DatatypeProperty ;
+    hydro:auditRole "Hydrologic hierarchy and scaling" ;
+    rdfs:comment "Strahler stream order classification." ;
+    rdfs:domain hydro:Reach ;
+    rdfs:range xsd:integer .
+
+hydro:hasTimeStep a owl:ObjectProperty ;
+    hydro:auditRole "Temporal continuity checks" ;
+    rdfs:comment "Associates a value with a specific timestep." ;
+    rdfs:domain hydro:Observation,
+        hydro:Prediction ;
+    rdfs:range hydro:TimeStep .
+
+hydro:TimeStep a owl:Class ;
+    rdfs:comment "A discrete temporal index used to relate dynamic observations and predictions." .
+
+hydro:Prediction a owl:Class ;
+    rdfs:comment "Model-generated outputs (e.g., LSTM streamflow predictions)." .
+
+hydro:Catchment a owl:Class ;
+    rdfs:comment "A hydrologic drainage basin used as a spatial aggregation unit." .
+
+hydro:Reach a owl:Class ;
+    rdfs:comment "A river network segment with static physical attributes and topology." .
+
+hydro:Observation a owl:Class ;
+    rdfs:comment "Measured hydrologic, meteorologic, or land-surface variables." .
+
